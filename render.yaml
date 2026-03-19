@@ -1,0 +1,39 @@
+services:
+  - type: web
+    name: foresight-engine
+    runtime: node
+    plan: starter
+    buildCommand: npm install
+    startCommand: node src/index.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: TIMEZONE
+        value: America/Chicago
+      - key: BRIEF_CRON
+        value: "15 4 * * *"
+      - key: ALERT_THRESHOLD
+        value: "85"
+      - key: SMTP_HOST
+        value: smtp.gmail.com
+      - key: SMTP_PORT
+        value: "587"
+      # Secret values - set these in Render dashboard
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: DELIVERY_EMAIL
+        sync: false
+      - key: NEWSAPI_KEY
+        sync: false
+      - key: FEEDBACK_URL
+        sync: false
+    disk:
+      name: foresight-data
+      mountPath: /opt/render/project/src/data
+      sizeGB: 1
