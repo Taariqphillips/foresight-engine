@@ -4,7 +4,8 @@ import { initializeDatabase, closeDatabase, getUndeliveredInsights, markInsights
 import { scanAllFeeds } from './scanners/rss-scanner.js';
 import { runWebSearches } from './scanners/web-scanner.js';
 import { synthesizeInsights } from './analysis/synthesis-engine.js';
-import { sendDailyBrief, sendAlert } from './delivery/email-delivery.js';
+import { sendEnhancedDailyBrief } from './delivery/email-delivery-v2.js';
+import { sendAlert } from './delivery/email-delivery.js';
 import { createFeedbackServer } from './feedback/feedback-api.js';
 
 // Configuration
@@ -101,7 +102,7 @@ export async function runFullPipeline() {
 
     // Step 5: Send daily brief
     log(`[PIPELINE] Sending daily brief with ${briefInsights.length} insights`);
-    const deliveryResult = await sendDailyBrief(briefInsights, scanResults);
+    const deliveryResult = await sendEnhancedDailyBrief(briefInsights, scanResults);
 
     // Mark insights as delivered
     if (deliveryResult.success) {

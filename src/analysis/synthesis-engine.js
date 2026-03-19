@@ -72,17 +72,27 @@ SIGNALS TO ANALYZE:
 ${formatSignalsForClaude(signals)}
 
 INSTRUCTIONS:
-Produce 2-5 high-quality insights from these signals. Each insight must be:
+Produce 2-5 high-quality intelligence briefings from these signals. Structure each insight like an operation order (OPORD) but use accessible language. Each insight must be:
 - SPECIFIC: Not generic advice, but tied to the wealth architect's actual position
-- ACTIONABLE: Include a concrete next step for THIS WEEK
+- CONTEXTUAL: Set the stage - what's emerging and why it matters NOW
+- ACTIONABLE: Clear execution steps, not vague monitoring
 - DUAL-LENS: Address both individual AND collective wealth creation when applicable
 
-Return your analysis as a JSON array. Each insight object must have:
-- title: Specific, punchy insight title (not generic)
-- analysis: 2-3 sentences connecting signal to strategic advantage, second-order effects
-- actionRecommendation: Concrete next step for THIS WEEK
+Return your analysis as a JSON array. Each insight object must have these fields:
+
+REQUIRED FIELDS:
+- title: Specific, punchy insight title (8-12 words max, not generic)
 - insightType: "signal" (new information), "pattern" (trend/theme), or "action_trigger" (time-sensitive opportunity)
 - relevanceScore: 1-100 based on strategic fit, timing urgency, and moat potential
+
+OPORD-INSPIRED STRUCTURE (use accessible language):
+- situation: 2-3 sentences explaining WHAT is emerging, WHO it affects, and WHY it's surfacing now. Set clear context - don't assume the reader knows the background.
+- implication: 2-3 sentences on what this MEANS for the wealth architect's position. Address timing (is this a 6-month window or structural shift?), leverage potential (1:1 or 1:many?), and moat creation (is this defensible?).
+- execution: Detailed action steps (3-5 concrete tasks) formatted as an array of strings. Each step should be specific enough that someone could execute it without asking clarifying questions. Include WHO to contact, WHAT to research, WHERE to look, and HOW to validate.
+- resources: Array of 2-4 strings listing what's needed to execute (e.g., "$10K capital", "2 hours research time", "contact at XYZ firm", "API access"). Be specific about enablers.
+- timeline: String indicating urgency - "This week", "Next 2-4 weeks", "This quarter", "Monitor over 6 months". Be realistic about execution windows.
+
+METADATA:
 - supportingSignalIndices: Array of signal indices [0, 1, 2, etc.] that support this insight
 
 Return ONLY the JSON array, no other text.`;
@@ -146,23 +156,27 @@ CROSS-DOMAIN SIGNALS:
 ${formatSignalsForClaude(crossDomainSignals)}
 
 INSTRUCTIONS:
-Identify 1-3 powerful cross-domain insights. Focus on:
+Identify 1-3 powerful cross-domain intelligence briefings. These are the HIGHEST-VALUE insights because they reveal non-obvious connections. Focus on:
 - How domains REINFORCE each other (e.g., AI + real estate, consciousness + business strategy)
 - COMPOUNDING EFFECTS: Where advantage in one domain amplifies advantage in another
 - TIMING WINDOWS: Opportunities that exist precisely because two trends are converging NOW
 - ARBITRAGE: Information from one domain that creates advantage in another
 
-Each insight must:
-- Show clear mechanism for how domains connect
-- Explain why this connection matters for BOTH individual and collective wealth
-- Provide specific action that exploits the cross-domain advantage
+Structure using the same OPORD-inspired format:
 
-Return your analysis as a JSON array. Each insight object must have:
-- title: Specific title highlighting the cross-domain connection
-- analysis: 2-3 sentences on mechanism, compounding effects, and strategic importance
-- actionRecommendation: Concrete next step to capture the cross-domain advantage
+REQUIRED FIELDS:
+- title: Specific title highlighting the cross-domain connection (10-15 words, show the bridge between domains)
 - insightType: MUST be "cross_domain"
-- relevanceScore: 1-100 (cross-domain insights should score higher)
+- relevanceScore: 1-100 (cross-domain insights should score 80+ due to strategic value)
+
+OPORD-INSPIRED STRUCTURE:
+- situation: Explain WHAT signals are converging across which domains, WHO benefits from seeing this connection, and WHY the convergence is happening now (not earlier, not later).
+- implication: Explain the compounding mechanism - how does advantage in Domain A amplify advantage in Domain B? What second/third-order effects emerge from this connection? Why is this connection defensible (hard for others to see/replicate)?
+- execution: 3-5 specific action steps that exploit the cross-domain advantage. Each step should bridge the domains - don't just list actions in Domain A then Domain B, but steps that actively USE the connection.
+- resources: What's needed to execute on this cross-domain opportunity (may require resources from multiple domains).
+- timeline: When to act on this convergence (cross-domain windows are often shorter because they close when others discover the connection).
+
+METADATA:
 - supportingSignalIndices: Array of signal indices
 
 Return ONLY the JSON array, no other text.`;

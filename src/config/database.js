@@ -48,13 +48,24 @@ export function initializeDatabase() {
       domain TEXT NOT NULL,
       insight_type TEXT NOT NULL, -- 'signal', 'pattern', 'action_trigger', 'cross_domain'
       title TEXT NOT NULL,
-      analysis TEXT NOT NULL,
-      action_recommendation TEXT NOT NULL,
+      -- OPORD-inspired structure
+      situation TEXT,           -- Context: what's emerging and why now
+      implication TEXT,         -- Strategic meaning and moat potential
+      execution TEXT,           -- JSON array of action steps
+      resources TEXT,           -- JSON array of required resources
+      timeline TEXT,            -- Execution window/urgency
+      -- Legacy fields (kept for backwards compatibility)
+      analysis TEXT,
+      action_recommendation TEXT,
       relevance_score INTEGER NOT NULL,
       supporting_signal_ids TEXT, -- JSON array of signal IDs
       generated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
       delivered BOOLEAN NOT NULL DEFAULT 0,
-      delivered_at DATETIME
+      delivered_at DATETIME,
+      -- Action tracking
+      action_status TEXT DEFAULT 'pending', -- 'pending', 'in_progress', 'completed', 'delegated', 'dismissed'
+      action_notes TEXT,
+      action_updated_at DATETIME
     );
 
     CREATE INDEX IF NOT EXISTS idx_insights_type ON insights(insight_type);
@@ -181,9 +192,11 @@ export function insertInsight(insight) {
   const id = uuidv4();
   const stmt = db.prepare(`
     INSERT INTO insights (
-      id, domain, insight_type, title, analysis, action_recommendation,
+      id, domain, insight_type, title,
+      situation, implication, execution, resources, timeline,
+      analysis, action_recommendation,
       relevance_score, supporting_signal_ids
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
   stmt.run(
@@ -191,8 +204,13 @@ export function insertInsight(insight) {
     insight.domain,
     insight.insightType,
     insight.title,
-    insight.analysis,
-    insight.actionRecommendation,
+    insight.situation || null,
+    insight.implication || null,
+    JSON.stringify(insight.execution || []),
+    JSON.stringify(insight.resources || []),
+    insight.timeline || null,
+    insight.analysis || null, // Legacy
+    insight.actionRecommendation || null, // Legacy
     insight.relevanceScore,
     JSON.stringify(insight.supportingSignalIds || [])
   );
@@ -208,9 +226,26 @@ export function getInsightById(insightId) {
 
   return {
     ...row,
+    execution: JSON.parse(row.execution || '[]'),
+    resources: JSON.parse(row.resources || '[]'),
     supportingSignalIds: JSON.parse(row.supporting_signal_ids || '[]'),
     delivered: Boolean(row.delivered)
   };
+}
+
+/**
+ * Update action status for an insight
+ */
+export function updateInsightAction(insightId, actionStatus, actionNotes = null) {
+  const stmt = db.prepare(`
+    UPDATE insights
+    SET action_status = ?,
+        action_notes = ?,
+        action_updated_at = CURRENT_TIMESTAMP
+    WHERE id = ?
+  `);
+
+  return stmt.run(actionStatus, actionNotes, insightId);
 }
 
 export function getUndeliveredInsights(limit = 20) {
@@ -226,6 +261,8 @@ export function getUndeliveredInsights(limit = 20) {
 
   return stmt.all(limit).map(row => ({
     ...row,
+    execution: JSON.parse(row.execution || '[]'),
+    resources: JSON.parse(row.resources || '[]'),
     supportingSignalIds: JSON.parse(row.supporting_signal_ids || '[]'),
     delivered: Boolean(row.delivered)
   }));
@@ -436,6 +473,8 @@ export function getRecentInsightsWithFeedback(limit = 20) {
 
   return stmt.all(limit).map(row => ({
     ...row,
+    execution: JSON.parse(row.execution || '[]'),
+    resources: JSON.parse(row.resources || '[]'),
     supportingSignalIds: JSON.parse(row.supporting_signal_ids || '[]'),
     delivered: Boolean(row.delivered)
   }));

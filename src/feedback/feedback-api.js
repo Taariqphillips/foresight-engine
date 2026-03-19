@@ -397,6 +397,80 @@ export function createFeedbackServer() {
     }
   });
 
+  // GET /action - Handle action button clicks (Execute, Delegate, Complete, Dismiss)
+  app.get('/action', async (req, res) => {
+    try {
+      const { id, status } = req.query;
+
+      if (!id || !status) {
+        return res.status(400).send('Missing required parameters');
+      }
+
+      const insight = getInsightById(id);
+
+      if (!insight) {
+        return res.status(404).send('Insight not found');
+      }
+
+      // Update action status
+      const { updateInsightAction } = await import('../config/database.js');
+      updateInsightAction(id, status);
+
+      // Generate confirmation page
+      const statusMessages = {
+        in_progress: { title: 'Executing', message: 'Marked as in progress. You\'ve committed to taking action on this insight.', icon: '⚡', color: '#3B82F6' },
+        delegated: { title: 'Delegated to AI', message: 'This task has been queued for AI agent execution. You\'ll receive updates as the agent makes progress. (AI delegation coming in Phase 2)', icon: '🤖', color: '#6366F1' },
+        completed: { title: 'Completed', message: 'Marked as complete. Great work executing on strategic intelligence!', icon: '✅', color: '#10B981' },
+        dismissed: { title: 'Dismissed', message: 'This insight has been dismissed. Your feedback helps the engine learn what matters to you.', icon: '✕', color: '#6B7280' }
+      };
+
+      const statusInfo = statusMessages[status] || statusMessages.dismissed;
+
+      const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${statusInfo.title}</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+  </style>
+</head>
+<body style="margin: 0; padding: 0; background: #F9FAFB; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+  <div style="max-width: 600px; margin: 80px auto; padding: 20px;">
+    <div style="background: white; padding: 48px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center;">
+      <div style="font-size: 64px; margin-bottom: 24px;">${statusInfo.icon}</div>
+      <h1 style="font-size: 28px; font-weight: 700; color: #111827; margin-bottom: 16px;">
+        ${statusInfo.title}
+      </h1>
+      <p style="font-size: 16px; color: #6B7280; line-height: 1.7; margin-bottom: 28px;">
+        ${statusInfo.message}
+      </p>
+      <div style="background: #F3F4F6; padding: 20px; border-radius: 12px; margin-bottom: 28px; text-align: left;">
+        <div style="font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 8px;">
+          ${insight.title}
+        </div>
+        <div style="font-size: 12px; color: #6B7280;">
+          ${insight.domain} • Score: ${insight.relevance_score}/100
+        </div>
+      </div>
+      <a href="${process.env.FEEDBACK_URL || 'http://localhost:3000'}/feedback?view=dashboard" style="display: inline-block; padding: 14px 32px; background: ${statusInfo.color}; color: white; text-decoration: none; border-radius: 10px; font-size: 15px; font-weight: 600;">
+        Back to Dashboard
+      </a>
+    </div>
+  </div>
+</body>
+</html>
+      `;
+
+      return res.send(html);
+    } catch (error) {
+      console.error('[feedback-api] Error handling action:', error);
+      return res.status(500).send('Internal server error');
+    }
+  });
+
   // GET /health - Health check
   app.get('/health', (req, res) => {
     const stats = getDashboardStats();
