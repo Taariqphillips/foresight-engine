@@ -80,95 +80,97 @@ function generateEnhancedBriefHTML(insights, scanSummary) {
   const insightsHTML = briefInsights.map((insight, index) => {
     const style = getInsightTypeStyle(insight.insight_type);
 
-    // Format execution steps
-    const executionSteps = (insight.execution || []).map((step, i) => `
-      <div style="display: flex; gap: 12px; margin-bottom: 10px;">
-        <div style="flex-shrink: 0; width: 24px; height: 24px; background: ${style.color}; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px;">
+    // Format execution steps (more concise)
+    const execution = Array.isArray(insight.execution) ? insight.execution : [];
+    const executionSteps = execution.map((step, i) => `
+      <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+        <div style="flex-shrink: 0; width: 20px; height: 20px; background: ${style.color}; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 11px;">
           ${i + 1}
         </div>
-        <div style="flex: 1; font-size: 14px; line-height: 1.6; color: #374151;">
+        <div style="flex: 1; font-size: 13px; line-height: 1.5; color: #374151;">
           ${step}
         </div>
       </div>
     `).join('');
 
-    // Format resources
-    const resourcesHTML = (insight.resources || []).map(resource => `
-      <span style="display: inline-block; background: #F3F4F6; padding: 6px 12px; border-radius: 6px; font-size: 13px; color: #374151; margin: 4px 4px 4px 0; border-left: 3px solid ${style.color};">
+    // Format resources (more compact)
+    const resources = Array.isArray(insight.resources) ? insight.resources : [];
+    const resourcesHTML = resources.map(resource => `
+      <span style="display: inline-block; background: #F3F4F6; padding: 4px 10px; border-radius: 4px; font-size: 12px; color: #374151; margin: 3px 3px 3px 0; border-left: 2px solid ${style.color};">
         ${resource}
       </span>
     `).join('');
 
     return `
-      <div style="margin-bottom: 32px; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.06);">
+      <div style="margin-bottom: 20px; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.08);">
 
         <!-- Insight Header -->
-        <div style="background: ${style.gradient}; padding: 24px; color: white;">
-          <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
-            <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; opacity: 0.95;">
+        <div style="background: ${style.gradient}; padding: 16px 20px; color: white;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <div style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; opacity: 0.9;">
               ${style.label}
             </div>
-            <div style="background: rgba(255,255,255,0.2); padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600;">
-              Score: ${insight.relevance_score}/100
+            <div style="background: rgba(255,255,255,0.25); padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600;">
+              ${insight.relevance_score}
             </div>
           </div>
-          <h2 style="margin: 0; font-size: 22px; font-weight: 700; line-height: 1.3; color: white;">
+          <h2 style="margin: 0; font-size: 18px; font-weight: 700; line-height: 1.3; color: white;">
             ${insight.title}
           </h2>
           ${insight.timeline ? `
-            <div style="margin-top: 12px; display: inline-block; background: rgba(255,255,255,0.15); padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600;">
+            <div style="margin-top: 8px; font-size: 11px; opacity: 0.9;">
               ⏱ ${insight.timeline}
             </div>
           ` : ''}
         </div>
 
         <!-- Insight Body -->
-        <div style="padding: 28px;">
+        <div style="padding: 20px;">
 
           <!-- SITUATION -->
-          <div style="margin-bottom: 24px;">
-            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
-              <div style="width: 4px; height: 20px; background: ${style.color}; border-radius: 2px;"></div>
-              <h3 style="margin: 0; font-size: 14px; font-weight: 700; color: #111827; text-transform: uppercase; letter-spacing: 0.5px;">
-                1. SITUATION — What's Emerging
+          <div style="margin-bottom: 16px;">
+            <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
+              <div style="width: 3px; height: 16px; background: ${style.color}; border-radius: 2px;"></div>
+              <h3 style="margin: 0; font-size: 12px; font-weight: 700; color: #111827; text-transform: uppercase; letter-spacing: 0.5px;">
+                SITUATION
               </h3>
             </div>
-            <p style="margin: 0; font-size: 15px; line-height: 1.7; color: #374151;">
+            <p style="margin: 0; font-size: 13px; line-height: 1.6; color: #374151;">
               ${insight.situation || insight.analysis || 'No context available'}
             </p>
           </div>
 
           <!-- IMPLICATION -->
-          <div style="margin-bottom: 24px;">
-            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
-              <div style="width: 4px; height: 20px; background: ${style.color}; border-radius: 2px;"></div>
-              <h3 style="margin: 0; font-size: 14px; font-weight: 700; color: #111827; text-transform: uppercase; letter-spacing: 0.5px;">
-                2. STRATEGIC IMPLICATION — Why This Matters
+          <div style="margin-bottom: 16px;">
+            <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
+              <div style="width: 3px; height: 16px; background: ${style.color}; border-radius: 2px;"></div>
+              <h3 style="margin: 0; font-size: 12px; font-weight: 700; color: #111827; text-transform: uppercase; letter-spacing: 0.5px;">
+                IMPLICATION
               </h3>
             </div>
-            <p style="margin: 0; font-size: 15px; line-height: 1.7; color: #374151;">
+            <p style="margin: 0; font-size: 13px; line-height: 1.6; color: #374151;">
               ${insight.implication || 'Strategic implications to be analyzed.'}
             </p>
           </div>
 
           <!-- EXECUTION -->
-          <div style="margin-bottom: 24px;">
-            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 14px;">
-              <div style="width: 4px; height: 20px; background: ${style.color}; border-radius: 2px;"></div>
-              <h3 style="margin: 0; font-size: 14px; font-weight: 700; color: #111827; text-transform: uppercase; letter-spacing: 0.5px;">
-                3. EXECUTION — Action Steps
+          <div style="margin-bottom: 16px;">
+            <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 10px;">
+              <div style="width: 3px; height: 16px; background: ${style.color}; border-radius: 2px;"></div>
+              <h3 style="margin: 0; font-size: 12px; font-weight: 700; color: #111827; text-transform: uppercase; letter-spacing: 0.5px;">
+                EXECUTION
               </h3>
             </div>
-            ${executionSteps || `<p style="margin: 0; font-size: 14px; color: #6B7280; font-style: italic;">No execution steps provided</p>`}
+            ${executionSteps || `<p style="margin: 0; font-size: 12px; color: #6B7280; font-style: italic;">No execution steps provided</p>`}
           </div>
 
           <!-- RESOURCES -->
-          ${(insight.resources || []).length > 0 ? `
-            <div style="margin-bottom: 24px;">
-              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
-                <div style="width: 4px; height: 20px; background: ${style.color}; border-radius: 2px;"></div>
-                <h3 style="margin: 0; font-size: 14px; font-weight: 700; color: #111827; text-transform: uppercase; letter-spacing: 0.5px;">
-                  4. RESOURCES REQUIRED
+          ${resources.length > 0 ? `
+            <div style="margin-bottom: 16px;">
+              <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 8px;">
+                <div style="width: 3px; height: 16px; background: ${style.color}; border-radius: 2px;"></div>
+                <h3 style="margin: 0; font-size: 12px; font-weight: 700; color: #111827; text-transform: uppercase; letter-spacing: 0.5px;">
+                  RESOURCES
                 </h3>
               </div>
               <div>
@@ -178,38 +180,28 @@ function generateEnhancedBriefHTML(insights, scanSummary) {
           ` : ''}
 
           <!-- ACTION BUTTONS -->
-          <div style="border-top: 2px solid #F3F4F6; padding-top: 20px;">
-            <div style="margin-bottom: 12px;">
-              <span style="font-size: 12px; font-weight: 600; color: #6B7280; text-transform: uppercase; letter-spacing: 0.5px;">
-                Take Action
-              </span>
-            </div>
-            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-              <a href="${FEEDBACK_URL}/action?id=${insight.id}&status=in_progress" style="display: inline-block; padding: 12px 20px; background: ${style.color}; color: white; text-decoration: none; border-radius: 8px; font-size: 14px; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                ✓ Execute Now
+          <div style="border-top: 1px solid #F3F4F6; padding-top: 12px; margin-top: 4px;">
+            <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px;">
+              <a href="${FEEDBACK_URL}/action?id=${insight.id}&status=in_progress" style="display: inline-block; padding: 8px 14px; background: ${style.color}; color: white; text-decoration: none; border-radius: 6px; font-size: 12px; font-weight: 600;">
+                ✓ Execute
               </a>
-              <a href="${FEEDBACK_URL}/action?id=${insight.id}&status=delegated" style="display: inline-block; padding: 12px 20px; background: #6366F1; color: white; text-decoration: none; border-radius: 8px; font-size: 14px; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                🤖 Delegate to AI
+              <a href="${FEEDBACK_URL}/action?id=${insight.id}&status=delegated" style="display: inline-block; padding: 8px 14px; background: #6366F1; color: white; text-decoration: none; border-radius: 6px; font-size: 12px; font-weight: 600;">
+                🤖 Delegate
               </a>
-              <a href="${FEEDBACK_URL}/action?id=${insight.id}&status=completed" style="display: inline-block; padding: 12px 20px; background: #10B981; color: white; text-decoration: none; border-radius: 8px; font-size: 14px; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                ✅ Mark Complete
+              <a href="${FEEDBACK_URL}/action?id=${insight.id}&status=completed" style="display: inline-block; padding: 8px 14px; background: #10B981; color: white; text-decoration: none; border-radius: 6px; font-size: 12px; font-weight: 600;">
+                ✅ Done
               </a>
-              <a href="${FEEDBACK_URL}/action?id=${insight.id}&status=dismissed" style="display: inline-block; padding: 12px 20px; background: #6B7280; color: white; text-decoration: none; border-radius: 8px; font-size: 14px; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+              <a href="${FEEDBACK_URL}/action?id=${insight.id}&status=dismissed" style="display: inline-block; padding: 8px 14px; background: #6B7280; color: white; text-decoration: none; border-radius: 6px; font-size: 12px; font-weight: 600;">
                 ✕ Dismiss
               </a>
             </div>
-          </div>
-
-          <!-- FEEDBACK -->
-          <div style="border-top: 1px solid #E5E7EB; padding-top: 16px; margin-top: 16px;">
-            <div style="margin-bottom: 8px;">
-              <span style="font-size: 11px; font-weight: 600; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.5px;">
-                Rate Relevance
+            <!-- FEEDBACK -->
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span style="font-size: 10px; font-weight: 600; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.3px; margin-right: 4px;">
+                Rate:
               </span>
-            </div>
-            <div style="display: flex; gap: 6px;">
               ${[1, 2, 3, 4, 5].map(rating => `
-                <a href="${FEEDBACK_URL}/feedback?id=${insight.id}&rating=${rating}" style="display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; background: #F3F4F6; color: #6B7280; text-decoration: none; border-radius: 8px; font-size: 14px; font-weight: 600; transition: all 0.2s;">
+                <a href="${FEEDBACK_URL}/feedback?id=${insight.id}&rating=${rating}" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; background: #F3F4F6; color: #6B7280; text-decoration: none; border-radius: 6px; font-size: 12px; font-weight: 600;">
                   ${rating}
                 </a>
               `).join('')}
@@ -234,42 +226,19 @@ function generateEnhancedBriefHTML(insights, scanSummary) {
 </head>
 <body style="margin: 0; padding: 0; background: #F9FAFB; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
 
-  <div style="max-width: 680px; margin: 0 auto; padding: 24px;">
+  <div style="max-width: 650px; margin: 0 auto; padding: 20px;">
 
     <!-- Hero Header -->
-    <div style="background: linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #334155 100%); padding: 48px 32px; border-radius: 20px; margin-bottom: 32px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);">
+    <div style="background: linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #334155 100%); padding: 32px 24px; border-radius: 16px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
       <div style="text-align: center;">
-        <div style="font-size: 11px; color: #94A3B8; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 12px; font-weight: 600;">
+        <div style="font-size: 10px; color: #94A3B8; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; font-weight: 600;">
           ${date}
         </div>
-        <h1 style="margin: 0 0 12px 0; font-size: 36px; font-weight: 800; color: #FFFFFF; letter-spacing: -1px; line-height: 1.2;">
-          STRATEGIC<br>INTELLIGENCE BRIEF
+        <h1 style="margin: 0 0 8px 0; font-size: 28px; font-weight: 800; color: #FFFFFF; letter-spacing: -0.5px; line-height: 1.2;">
+          STRATEGIC INTELLIGENCE
         </h1>
-        <div style="width: 60px; height: 3px; background: linear-gradient(90deg, #3B82F6, #8B5CF6); margin: 16px auto; border-radius: 2px;"></div>
-        <div style="font-size: 15px; color: #CBD5E1; font-weight: 500;">
-          Daily Reconnaissance for Generational Wealth
-        </div>
-      </div>
-    </div>
-
-    <!-- Quick Stats -->
-    <div style="background: white; padding: 24px; border-radius: 16px; margin-bottom: 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; text-align: center;">
-        <div>
-          <div style="font-size: 28px; font-weight: 800; color: #111827; margin-bottom: 4px;">${briefInsights.length}</div>
-          <div style="font-size: 10px; color: #6B7280; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">Insights</div>
-        </div>
-        <div>
-          <div style="font-size: 28px; font-weight: 800; color: #DC2626; margin-bottom: 4px;">${actionCount}</div>
-          <div style="font-size: 10px; color: #6B7280; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">Actions</div>
-        </div>
-        <div>
-          <div style="font-size: 28px; font-weight: 800; color: #7C3AED; margin-bottom: 4px;">${crossDomainCount}</div>
-          <div style="font-size: 10px; color: #6B7280; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">Cross-Domain</div>
-        </div>
-        <div>
-          <div style="font-size: 28px; font-weight: 800; color: #059669; margin-bottom: 4px;">${patternCount}</div>
-          <div style="font-size: 10px; color: #6B7280; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">Patterns</div>
+        <div style="font-size: 13px; color: #CBD5E1; font-weight: 500;">
+          ${briefInsights.length} Insights • ${scanSummary?.totalSignals || 0} Signals Analyzed
         </div>
       </div>
     </div>
@@ -278,16 +247,12 @@ function generateEnhancedBriefHTML(insights, scanSummary) {
     ${insightsHTML}
 
     <!-- Footer -->
-    <div style="background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%); padding: 32px; border-radius: 16px; text-align: center; margin-top: 32px;">
-      <div style="font-size: 13px; color: #94A3B8; margin-bottom: 16px; line-height: 1.6;">
-        Synthesized from <strong style="color: #CBD5E1;">${scanSummary?.totalSignals || 0} signals</strong> across AI & Autonomous Systems, Real Assets & Spatial Economics, and Human Systems & Consciousness Infrastructure
-      </div>
-      <a href="${FEEDBACK_URL}/feedback?view=dashboard" style="display: inline-block; padding: 14px 32px; background: linear-gradient(135deg, #3B82F6, #2563EB); color: white; text-decoration: none; border-radius: 10px; font-size: 15px; font-weight: 700; box-shadow: 0 4px 6px rgba(37,99,235,0.3); margin-bottom: 20px;">
+    <div style="background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%); padding: 24px; border-radius: 12px; text-align: center; margin-top: 20px;">
+      <a href="${FEEDBACK_URL}/feedback?view=dashboard" style="display: inline-block; padding: 10px 24px; background: linear-gradient(135deg, #3B82F6, #2563EB); color: white; text-decoration: none; border-radius: 8px; font-size: 13px; font-weight: 600; box-shadow: 0 2px 4px rgba(37,99,235,0.3); margin-bottom: 12px;">
         View Dashboard →
       </a>
-      <div style="font-size: 11px; color: #64748B; margin-top: 16px;">
-        Foresight Engine — Strategic Intelligence for the Wealth Architect<br>
-        <span style="color: #475569;">Powered by Claude Sonnet 4 | P&F Management Group</span>
+      <div style="font-size: 10px; color: #64748B; margin-top: 12px;">
+        Foresight Engine | Powered by Claude Sonnet 4
       </div>
     </div>
 
