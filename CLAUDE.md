@@ -6,6 +6,7 @@ A strategic foresight intelligence engine that:
 2. SYNTHESIZES raw signals into actionable insights using Claude's API
 3. DELIVERS a daily strategic brief via email at 4:15 AM CT
 4. LEARNS from user feedback to improve relevance over time
+5. EXECUTES on insights autonomously via Claude computer use agents (OpenClaw)
 
 ## Architecture
 - Runtime: Node.js (ES modules, "type": "module" in package.json)
@@ -29,8 +30,11 @@ foresight-engine/
 │   │   └── web-scanner.js          # Web search scanning via NewsAPI + fallback
 │   ├── analysis/
 │   │   └── synthesis-engine.js     # Claude API-powered insight generation
+│   ├── agents/                     # OpenClaw autonomous agent system
+│   │   └── agent-orchestrator.js   # Agent spawning, orchestration, monitoring
 │   ├── delivery/
-│   │   └── email-delivery.js       # HTML email templates + SMTP delivery
+│   │   ├── email-delivery-v2.js    # Enhanced OPORD-style email templates
+│   │   └── agent-report-email.js   # Agent execution report emails
 │   └── feedback/
 │       └── feedback-api.js         # Express server, feedback processing, dashboard
 ├── data/                           # SQLite database (auto-created, gitignored)
@@ -78,3 +82,62 @@ foresight-engine/
 - Run `npm run brief` for a manual pipeline test
 - Check http://localhost:3000/feedback?view=dashboard for operational status
 - Verify email delivery to configured DELIVERY_EMAIL
+
+## OpenClaw Agent Integration (Autonomous Execution)
+
+### What It Does
+When the user clicks "🤖 Delegate" in an email insight, the system spawns an autonomous Claude agent with computer use capabilities to execute the tasks.
+
+### Agent Types
+The orchestrator automatically determines the agent type based on insight content:
+- **Trading Agent**: Handles buy/sell/invest signals (with safeguards)
+- **Research Agent**: Conducts web research, data gathering, analysis
+- **Monitoring Agent**: Tracks metrics, securities, market conditions
+- **Data Gathering Agent**: Systematically collects and organizes information
+- **General Agent**: Handles miscellaneous tasks
+
+### How It Works
+1. **User clicks "🤖 Delegate"** → HTTP GET /action?id=...&status=delegated
+2. **Feedback API spawns agent** → delegateToAgent(insight)
+3. **Agent Orchestrator**:
+   - Determines agent type from insight content
+   - Builds OPORD-style mission brief for the agent
+   - Spawns Claude with computer use tools enabled
+   - Monitors execution progress
+4. **Agent executes autonomously**:
+   - Uses web browser, bash, text editor tools
+   - Follows execution steps from insight
+   - Documents all actions and findings
+5. **Results delivered via email** → sendAgentReport()
+
+### Safety Mechanisms
+- **Trading Safeguards**: For trades >$10K, agent prepares order but requests manual approval (no auto-execution)
+- **Verification**: Agent must verify data from multiple sources
+- **Error Handling**: If agent fails, error notification sent to user
+- **Audit Trail**: All agent actions logged in database with timestamps
+- **Action Status Tracking**: Database tracks pending/in_progress/completed/delegated/dismissed states
+
+### Agent Prompt Structure
+Agents receive OPORD-formatted mission brief:
+```
+SITUATION: What's emerging and why now
+IMPLICATION: Strategic meaning, timing, leverage, moat
+EXECUTION: 3-5 concrete action steps
+RESOURCES: What's needed to execute
+TIMELINE: Execution window/urgency
+```
+
+### Files
+- `src/agents/agent-orchestrator.js` → Core agent spawning and orchestration logic
+- `src/delivery/agent-report-email.js` → Email templates for agent results/errors
+- `src/feedback/feedback-api.js` → Integration point (GET /action endpoint)
+
+### Model Used
+- `claude-3-5-sonnet-20241022` with computer use capabilities (computer_20241022, text_editor_20241022, bash_20241022)
+
+### Future Enhancements
+- Trading execution via broker APIs (Alpaca, Interactive Brokers)
+- Credential management for secure logins (1Password integration)
+- Multi-step agent workflows with approval checkpoints
+- Agent-to-agent handoffs for complex missions
+- Real-time progress streaming to user
