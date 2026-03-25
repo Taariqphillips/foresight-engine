@@ -1,0 +1,106 @@
+[database] Database initialized
+═══════════════════════════════════════════════════════
+SANDBOX AGENT TEST
+═══════════════════════════════════════════════════════
+
+📝 Creating test insight...
+
+✅ Test insight created: 6704660e-abe3-45bb-a32f-5b0e462ec5ce
+
+📋 Insight Details:
+   Title: OpenAI GPT-5 Capabilities Research
+   Type: signal
+   Domain: AI-PROD
+   Score: 88/100
+
+🔒 Sandbox Configuration:
+   Mode: strict
+   Dry Run: false
+
+🤖 Delegating to research agent...
+   Expected Agent Type: research
+   Allowed Tools: web_search_20260209, web_fetch_20260309
+   Blocked Tools: Bash, file editing
+   Max Searches: 20
+   Max Fetches: 50
+
+⏳ Agent is executing (this may take 1-3 minutes)...
+
+[agent-orchestrator][2026-03-25T20:41:20.518Z] Delegating insight 6704660e-abe3-45bb-a32f-5b0e462ec5ce to agent
+[agent-orchestrator] Agent type: research
+[agent-orchestrator][2026-03-25T20:41:20.519Z] Spawning research agent for insight 6704660e-abe3-45bb-a32f-5b0e462ec5ce
+(node:8334) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+[sandbox-enforcer] Created workspace: /Users/pfmanagementgroup/projects/foresight-engine/data/agent-workspace/6704660e-abe3-45bb-a32f-5b0e462ec5ce
+[sandbox-enforcer] Sandbox mode: strict
+[sandbox-enforcer] Agent type: research
+[sandbox-enforcer] Allowed tools: web_search_20260209, web_fetch_20260309
+[agent-orchestrator] Sandbox status: {
+  enabled: true,
+  mode: 'strict',
+  agentType: 'research',
+  permissions: { browser: undefined, bash: false, fileEditing: false },
+  toolsAvailable: [ 'web_search_20260209', 'web_fetch_20260309' ],
+  approvalRequired: [ 'download_file' ],
+  dryRun: false
+}
+[SECURITY][2026-03-25T20:41:20.520Z] AGENT_SPAWNED {
+  agentType: 'research',
+  insightId: '6704660e-abe3-45bb-a32f-5b0e462ec5ce',
+  sandboxEnabled: true,
+  mode: 'strict',
+  toolsAvailable: 2,
+  permissions: { browser: undefined, bash: false, fileEditing: false }
+}
+[agent-orchestrator][2026-03-25T20:42:54.480Z] Agent completed for insight 6704660e-abe3-45bb-a32f-5b0e462ec5ce
+[agent-orchestrator] Output length: 11397 characters
+[SECURITY][2026-03-25T20:42:54.483Z] AGENT_COMPLETED {
+  agentType: 'research',
+  insightId: '6704660e-abe3-45bb-a32f-5b0e462ec5ce',
+  tokensUsed: 236905,
+  outputLength: 11397
+}
+[sandbox-enforcer] Keeping workspace files for insight 6704660e-abe3-45bb-a32f-5b0e462ec5ce
+
+═══════════════════════════════════════════════════════
+AGENT EXECUTION COMPLETE
+═══════════════════════════════════════════════════════
+
+✅ Status: SUCCESS
+
+📊 Tokens Used: 236905
+📝 Output Length: 11397 characters
+
+🔒 Sandbox Status:
+   Enabled: true
+   Mode: strict
+   Agent Type: research
+   Tools Available: 2
+   Permissions: { browser: undefined, bash: false, fileEditing: false }
+
+📄 Agent Output (first 1000 chars):
+────────────────────────────────────────────────────────────
+I'll execute the GPT-5 capabilities research mission systematically. Let me begin by searching for the latest information on OpenAI's GPT-5 announcements and technical details.
+
+Now let me search for competitor responses to analyze how other AI companies are reacting to GPT-5.
+
+Let me search for specific business applications and use cases for GPT-5 to understand the market opportunities.
+
+Let me search for specific benchmark data and technical specifications to get more precise capabilities information.
+
+Now let me get specific information about market impact and investment opportunities by searching for financial analysis and industry reports.
+
+Based on my comprehensive research, I can now compile the findings into the structured report. Let me create a detailed intelligence report on GPT-5 capabilities and their implications for strategic investment.
+
+## MISSION SUMMARY
+
+I successfully executed comprehensive research on OpenAI's GPT-5 capabilities, conducting 5 targeted web searches
+────────────────────────────────────────────────────────────
+
+✉️  Check your email for the full agent report!
+📂 Workspace: /data/agent-workspace/6704660e-abe3-45bb-a32f-5b0e462ec5ce/
+
+═══════════════════════════════════════════════════════
+View full results: http://localhost:3000/feedback?view=dashboard
+═══════════════════════════════════════════════════════
+

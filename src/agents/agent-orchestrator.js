@@ -13,8 +13,8 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY
 });
 
-// Model with computer use capabilities
-const AGENT_MODEL = 'claude-3-5-sonnet-20241022';
+// Model with web search and fetch capabilities
+const AGENT_MODEL = 'claude-sonnet-4-20250514';
 const MAX_AGENT_TOKENS = 8000;
 
 /**

@@ -122,54 +122,59 @@ export const FILESYSTEM_RULES = {
 // Agent type-specific permissions
 export const AGENT_PERMISSIONS = {
   research: {
-    allowedTools: ['computer_20241022'],  // Browser only, no bash/file editing
+    allowedTools: ['web_search_20260209', 'web_fetch_20260309'],  // Web search + fetch
     bashEnabled: false,
     fileEditingEnabled: false,
-    browserEnabled: true,
-    requireApprovalFor: ['download_file', 'submit_form'],
-    maxBrowserTabs: 5,
-    maxNavigations: 50
+    webSearchEnabled: true,
+    webFetchEnabled: true,
+    requireApprovalFor: ['download_file'],
+    maxSearches: 20,
+    maxFetches: 50
   },
 
   data_gathering: {
-    allowedTools: ['computer_20241022', 'text_editor_20241022'],  // Browser + text editor
+    allowedTools: ['web_search_20260209', 'web_fetch_20260309', 'text_editor_20250728'],  // Web + text editor
     bashEnabled: false,
     fileEditingEnabled: true,  // Can create data files in sandbox
-    browserEnabled: true,
+    webSearchEnabled: true,
+    webFetchEnabled: true,
     requireApprovalFor: ['download_file', 'large_file_write'],  // Files > 1MB
-    maxBrowserTabs: 10,
-    maxNavigations: 100
+    maxSearches: 30,
+    maxFetches: 100
   },
 
   monitoring: {
-    allowedTools: ['computer_20241022'],  // Browser only
+    allowedTools: ['web_search_20260209', 'web_fetch_20260309'],  // Web search + fetch
     bashEnabled: false,
     fileEditingEnabled: false,
-    browserEnabled: true,
+    webSearchEnabled: true,
+    webFetchEnabled: true,
     requireApprovalFor: ['download_file'],
-    maxBrowserTabs: 3,
-    maxNavigations: 20
+    maxSearches: 10,
+    maxFetches: 20
   },
 
   trading: {
     allowedTools: [],  // NO TOOLS by default - trading is human-in-the-loop only
     bashEnabled: false,
     fileEditingEnabled: false,
-    browserEnabled: false,  // Can enable manually but requires approval for ALL actions
+    webSearchEnabled: false,
+    webFetchEnabled: false,
     requireApprovalFor: ['*'],  // Everything requires approval
-    maxBrowserTabs: 1,
-    maxNavigations: 10,
+    maxSearches: 5,
+    maxFetches: 10,
     alwaysDryRun: true  // Trading agents always run in dry-run mode
   },
 
   general: {
-    allowedTools: ['computer_20241022'],  // Browser only
+    allowedTools: ['web_search_20260209', 'web_fetch_20260309'],  // Web search + fetch
     bashEnabled: false,
     fileEditingEnabled: false,
-    browserEnabled: true,
-    requireApprovalFor: ['download_file', 'submit_form'],
-    maxBrowserTabs: 5,
-    maxNavigations: 30
+    webSearchEnabled: true,
+    webFetchEnabled: true,
+    requireApprovalFor: ['download_file'],
+    maxSearches: 15,
+    maxFetches: 30
   }
 };
 
@@ -230,37 +235,45 @@ export function getAllowedTools(agentType) {
   if (SANDBOX_MODE === 'disabled') {
     // Full access when sandbox disabled
     return [
-      { type: 'computer_20241022', name: 'computer', display_width_px: 1920, display_height_px: 1080 },
-      { type: 'text_editor_20241022', name: 'str_replace_editor' },
-      { type: 'bash_20241022', name: 'bash' }
+      { type: 'web_search_20260209' },
+      { type: 'web_fetch_20260309' },
+      { type: 'text_editor_20250728' },
+      { type: 'bash_20250124' }
     ];
   }
 
   const tools = [];
 
-  // Add browser tool if enabled
-  if (permissions.browserEnabled && permissions.allowedTools.includes('computer_20241022')) {
+  // Add web search if enabled
+  if (permissions.webSearchEnabled && permissions.allowedTools.includes('web_search_20260209')) {
     tools.push({
-      type: 'computer_20241022',
-      name: 'computer',
-      display_width_px: 1920,
-      display_height_px: 1080,
-      display_number: 1
+      type: 'web_search_20260209',
+      name: 'web_search',
+      allowed_callers: ['direct']  // Required for Sonnet 4
+    });
+  }
+
+  // Add web fetch if enabled
+  if (permissions.webFetchEnabled && permissions.allowedTools.includes('web_fetch_20260309')) {
+    tools.push({
+      type: 'web_fetch_20260309',
+      name: 'web_fetch',
+      allowed_callers: ['direct']  // Required for Sonnet 4
     });
   }
 
   // Add text editor if enabled
-  if (permissions.fileEditingEnabled && permissions.allowedTools.includes('text_editor_20241022')) {
+  if (permissions.fileEditingEnabled && permissions.allowedTools.includes('text_editor_20250728')) {
     tools.push({
-      type: 'text_editor_20241022',
+      type: 'text_editor_20250728',
       name: 'str_replace_editor'
     });
   }
 
   // Add bash if enabled (with restrictions)
-  if (permissions.bashEnabled && permissions.allowedTools.includes('bash_20241022')) {
+  if (permissions.bashEnabled && permissions.allowedTools.includes('bash_20250124')) {
     tools.push({
-      type: 'bash_20241022',
+      type: 'bash_20250124',
       name: 'bash'
     });
   }

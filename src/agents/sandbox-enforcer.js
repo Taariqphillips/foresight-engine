@@ -71,15 +71,18 @@ RESTRICTED TOOLS: All tools not listed above are DISABLED.`);
 You should prepare detailed recommendations but NOT execute any actions.`);
   }
 
-  // Browser restrictions
-  if (config.permissions.browserEnabled) {
-    sections.push(`BROWSER ACCESS:
-- Maximum tabs: ${config.permissions.maxBrowserTabs}
-- Maximum navigations: ${config.permissions.maxNavigations}
-- Only navigate to trusted, public websites
+  // Web search and fetch restrictions
+  if (config.permissions.webSearchEnabled || config.permissions.webFetchEnabled) {
+    const capabilities = [];
+    if (config.permissions.webSearchEnabled) capabilities.push(`- Web search enabled (max ${config.permissions.maxSearches} searches)`);
+    if (config.permissions.webFetchEnabled) capabilities.push(`- Web fetch enabled (max ${config.permissions.maxFetches} fetches)`);
+
+    sections.push(`WEB ACCESS:
+${capabilities.join('\n')}
+- Only access trusted, public websites
 - Do NOT access internal/localhost URLs
-- Do NOT submit forms without explicit user approval
-- Do NOT download files without explicit user approval`);
+- Do NOT download files without explicit user approval
+- Verify all information from multiple sources`);
   }
 
   // Bash restrictions
