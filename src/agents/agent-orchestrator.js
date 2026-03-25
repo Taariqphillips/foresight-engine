@@ -1,5 +1,13 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { updateInsightAction, getInsightById } from '../config/database.js';
+import {
+  validateAgentPrompt,
+  createSandboxWorkspace,
+  cleanupSandboxWorkspace,
+  getSandboxStatus,
+  logSecurityEvent
+} from './sandbox-enforcer.js';
+import { getAllowedTools, isSandboxEnabled } from './sandbox-config.js';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY
@@ -234,38 +242,49 @@ GENERAL AGENT INSTRUCTIONS:
 }
 
 /**
- * Spawn Claude agent with computer use capabilities
+ * Spawn Claude agent with computer use capabilities (sandboxed)
  */
 async function spawnAgent(prompt, insightId, agentType) {
   const timestamp = new Date().toISOString();
   console.log(`[agent-orchestrator][${timestamp}] Spawning ${agentType} agent for insight ${insightId}`);
 
   try {
-    // Create message with computer use tools
+    // Create sandbox workspace
+    const workspace = await createSandboxWorkspace(insightId);
+    if (!workspace.success) {
+      throw new Error(`Failed to create sandbox workspace: ${workspace.error}`);
+    }
+
+    // Validate prompt and apply sandbox constraints
+    const validation = validateAgentPrompt(prompt, agentType, insightId);
+    if (!validation.valid) {
+      throw new Error('Prompt validation failed');
+    }
+
+    const sandboxedPrompt = validation.sandboxedPrompt || prompt;
+
+    // Get allowed tools for this agent type
+    const allowedTools = getAllowedTools(agentType);
+
+    // Log sandbox status
+    const sandboxStatus = getSandboxStatus(agentType);
+    console.log(`[agent-orchestrator] Sandbox status:`, sandboxStatus);
+    logSecurityEvent('AGENT_SPAWNED', agentType, insightId, {
+      sandboxEnabled: sandboxStatus.enabled,
+      mode: sandboxStatus.mode,
+      toolsAvailable: allowedTools.length,
+      permissions: sandboxStatus.permissions
+    });
+
+    // Create message with sandbox-restricted tools
     const response = await anthropic.messages.create({
       model: AGENT_MODEL,
       max_tokens: MAX_AGENT_TOKENS,
       messages: [{
         role: 'user',
-        content: prompt
+        content: sandboxedPrompt
       }],
-      tools: [
-        {
-          type: 'computer_20241022',
-          name: 'computer',
-          display_width_px: 1920,
-          display_height_px: 1080,
-          display_number: 1
-        },
-        {
-          type: 'text_editor_20241022',
-          name: 'str_replace_editor'
-        },
-        {
-          type: 'bash_20241022',
-          name: 'bash'
-        }
-      ]
+      tools: allowedTools.length > 0 ? allowedTools : undefined
     });
 
     // Extract agent output
@@ -289,23 +308,42 @@ async function spawnAgent(prompt, insightId, agentType) {
       `Agent execution complete. ${truncatedOutput}`
     );
 
+    // Log successful completion
+    logSecurityEvent('AGENT_COMPLETED', agentType, insightId, {
+      tokensUsed: response.usage.input_tokens + response.usage.output_tokens,
+      outputLength: agentOutput.length
+    });
+
+    // Cleanup sandbox workspace (keep files for review)
+    await cleanupSandboxWorkspace(insightId, true);
+
     return {
       success: true,
       output: agentOutput,
       insightId,
       agentType,
-      tokensUsed: response.usage.input_tokens + response.usage.output_tokens
+      tokensUsed: response.usage.input_tokens + response.usage.output_tokens,
+      sandboxStatus
     };
 
   } catch (error) {
     const errorTimestamp = new Date().toISOString();
     console.error(`[agent-orchestrator][${errorTimestamp}] Agent failed for insight ${insightId}:`, error);
 
+    // Log security event for failure
+    logSecurityEvent('AGENT_FAILED', agentType, insightId, {
+      error: error.message,
+      stack: error.stack?.substring(0, 500)
+    });
+
     updateInsightAction(
       insightId,
       'in_progress',
       `Agent encountered error: ${error.message}. Manual review required.`
     );
+
+    // Cleanup sandbox workspace on error
+    await cleanupSandboxWorkspace(insightId, false);
 
     return {
       success: false,
